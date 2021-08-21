@@ -100,7 +100,6 @@ async function createPost({
       VALUES($1, $2, $3)
       RETURNING *;
     `, [authorId, title, content]);
-
     const tagList = await createTags(tags);
 
     return await addTagsToPost(post.id, tagList);
@@ -182,6 +181,15 @@ async function getPostById(postId) {
       FROM posts
       WHERE id=$1;
     `, [postId]);
+
+    // THIS IS NEW
+    if (!post) {
+      throw {
+        name: "PostNotFoundError",
+        message: "Could not find a post with that postId"
+      };
+    }
+    // NEWNESS ENDS HERE
 
     const { rows: tags } = await client.query(`
       SELECT tags.*
@@ -350,5 +358,6 @@ module.exports = {
   getAllTags,
   createPostTag,
   addTagsToPost,
-  getUserByUsername
+  getUserByUsername,
+  getPostById
 }
